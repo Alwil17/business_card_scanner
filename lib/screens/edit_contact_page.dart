@@ -1,17 +1,14 @@
+import 'package:business_card_scanner/models/business_card.dart';
 import 'package:flutter/material.dart';
 import 'package:contacts_service/contacts_service.dart';
 
 class EditContactPage extends StatefulWidget {
   final String scannedText;
-  final String name;
-  final List<String> phones;
-  final List<String> emails;
+  final BusinessCard card;
 
   EditContactPage({
-    required this.scannedText,
-    required this.name,
-    required this.phones,
-    required this.emails,
+    required this.card,
+    required this.scannedText
   });
 
   @override
@@ -26,9 +23,9 @@ class _EditContactPageState extends State<EditContactPage> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.name);
-    _phoneControllers = widget.phones.map((phone) => TextEditingController(text: phone)).toList();
-    _emailControllers = widget.emails.map((email) => TextEditingController(text: email)).toList();
+    _nameController = TextEditingController(text: widget.card.name);
+    _phoneControllers = widget.card.phoneNumbers.map((phone) => TextEditingController(text: phone)).toList();
+    _emailControllers = widget.card.emails.map((email) => TextEditingController(text: email)).toList();
   }
 
   @override
