@@ -103,7 +103,7 @@ Pour tester l'application, vous pouvez utiliser les images fournies ou vos propr
 
 Voici quelques exemples d'images de cartes de visite que vous pouvez utiliser pour tester l'application :
 
-- ![Test Image 1](./screenshots/sample_card.png)
+- ![Test Image 1](./screenshots/sample_card.PNG)
 
 ### Scénarios de test
 

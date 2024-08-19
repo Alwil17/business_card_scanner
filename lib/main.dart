@@ -1,8 +1,13 @@
+import 'package:business_card_scanner/db/card_provider.dart';
 import 'package:business_card_scanner/screens/camera_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => CardProvider(),
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {

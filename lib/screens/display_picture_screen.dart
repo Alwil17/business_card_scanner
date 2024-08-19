@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:business_card_scanner/models/business_card.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,13 +17,24 @@ class DisplayPictureScreen extends StatefulWidget {
 }
 
 class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
+  late BusinessCard scannedCard;
   String scannedText = "Scanning...";
   String name = "";
+  String url = "";
+  String address = "";
   final nameRegExp = RegExp(r'[!@#<>?":_`~;[\]\\|=+)(*&^%0-9-]');
   final phoneRegExp = RegExp(
-      r'(\+\d{1,2}\s?)?(\(\d{1,4}\)\s?)?(\d{3}[\s.-]?\d{3}[\s.-]?\d{4})');
+      r'(?:\+?\d{1,3}[-.\s]?)?(?:\(\d{1,4}\)|\d{1,4})[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}');
   final emailRegExp = RegExp(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b',
       caseSensitive: false);
+  final urlRegExp = RegExp(
+    r'(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])',
+    caseSensitive: false,
+  );
+  final addressRegExp = RegExp(
+    r'\d+\s+[\w\s-]+(?:\n[\w\s-]+)?(?:\n[A-Z]{2})?\n[A-Z]\d[A-Z] \d[A-Z]\d',
+    caseSensitive: false,
+  );
   List<String> phones = [];
   List<String> emails = [];
 
@@ -45,17 +57,30 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     final foundPhones = phoneRegExp
         .allMatches(recognisedText.text)
         .map((match) => match.group(0))
+        .where((phone) => (phone != null) && phone.trim().length >= 7) // Filtre les numéros avec au moins 6 chiffres
         .cast<String>()
         .toList();
+
     final foundEmails = emailRegExp
         .allMatches(recognisedText.text)
         .map((match) => match.group(0))
         .cast<String>()
         .toList();
-
+    final foundUrls = urlRegExp
+        .allMatches(recognisedText.text)
+        .map((match) => match.group(0))
+        .cast<String>()
+        .toList();
+    final foundAddress = addressRegExp
+        .allMatches(recognisedText.text)
+        .map((match) => match.group(0))
+        .cast<String>()
+        .toList();
     if (foundPhones.isNotEmpty) phones = foundPhones;
     if (foundEmails.isNotEmpty) emails = foundEmails;
-
+    // assuming that one url is present in most of cases
+    if (foundUrls.isNotEmpty) url = foundUrls[0];
+    if (foundAddress.isNotEmpty) address = foundAddress[0];
     // si ces infos ont été trouvées, on les retire du text extrait.
     //final recognisedTextString = recognisedText.text;
     //final cleanedText = _removePhoneAndEmail(recognisedTextString);
@@ -76,7 +101,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     }
 
     if(extractedText.isNotEmpty){
-      String cleanedText = _removePhoneAndEmail(extractedText);
+      String cleanedText = _removeFoundInfos(extractedText);
       cleanedText.split("\n").forEach((line) {
         if(line.length >= 3){
           if(name.isEmpty){
@@ -90,18 +115,25 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
 
 
     setState(() {
+      // just some precautions
       phones = phones;
       emails = emails;
+      url = url;
+
+      scannedCard = BusinessCard(name: name, emails: emails, phoneNumbers: phones, imagePath: "", address: address, website: url);
+
       scannedText = extractedText;
     });
 
     textDetector.close();
   }
 
-  String _removePhoneAndEmail(String text) {
+  String _removeFoundInfos(String text) {
     String cleanedText = text;
     cleanedText = cleanedText.replaceAll(phoneRegExp, '');
     cleanedText = cleanedText.replaceAll(emailRegExp, '');
+    cleanedText = cleanedText.replaceAll(urlRegExp, '');
+    cleanedText = cleanedText.replaceAll(addressRegExp, '');
 
     return cleanedText.trim();
   }
@@ -111,9 +143,13 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Text(
+          'Nom :',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         Text(
-          'Nom : $name',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          name,
+          style: const TextStyle(fontSize: 18),
         ),
         const SizedBox(height: 8),
         const Text(
@@ -131,6 +167,24 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
         ...emails
             .map((email) => Text(email, style: const TextStyle(fontSize: 18)))
             .toList(),
+        const SizedBox(height: 8),
+        const Text(
+          'Url :',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          url,
+          style: const TextStyle(fontSize: 18),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Adresse',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          address,
+          style: const TextStyle(fontSize: 18),
+        ),
       ],
     );
   }
@@ -159,12 +213,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditContactPage(
-          scannedText: scannedText,
-          name: name,
-          phones: phones,
-          emails: emails,
-        ),
+        builder: (context) => EditContactPage(card: scannedCard, scannedText: scannedText),
       ),
     );
   }
