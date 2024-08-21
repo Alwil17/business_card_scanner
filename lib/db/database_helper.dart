@@ -47,6 +47,8 @@ class DatabaseHelper {
     final Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query('cards');
 
+    print("--------------${maps.length}");
+
     return List.generate(maps.length, (i) {
       return BusinessCard.fromMap(maps[i]);
     });

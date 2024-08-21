@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:business_card_scanner/db/card_provider.dart';
 import 'package:business_card_scanner/models/business_card.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:provider/provider.dart';
 
 import 'edit_contact_page.dart';
 
@@ -57,7 +59,10 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     final foundPhones = phoneRegExp
         .allMatches(recognisedText.text)
         .map((match) => match.group(0))
-        .where((phone) => (phone != null) && phone.trim().length >= 7) // Filtre les numéros avec au moins 6 chiffres
+        .where((phone) =>
+            (phone != null) &&
+            phone.trim().length >=
+                7) // Filtre les numéros avec au moins 6 chiffres
         .cast<String>()
         .toList();
 
@@ -100,11 +105,11 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       }
     }
 
-    if(extractedText.isNotEmpty){
+    if (extractedText.isNotEmpty) {
       String cleanedText = _removeFoundInfos(extractedText);
       cleanedText.split("\n").forEach((line) {
-        if(line.length >= 3){
-          if(name.isEmpty){
+        if (line.length >= 3) {
+          if (name.isEmpty) {
             if (nameRegExp.hasMatch(line)) {
               name = line.trim();
             }
@@ -113,14 +118,19 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       });
     }
 
-
     setState(() {
       // just some precautions
       phones = phones;
       emails = emails;
       url = url;
 
-      scannedCard = BusinessCard(name: name, emails: emails, phoneNumbers: phones, imagePath: "", address: address, website: url);
+      scannedCard = BusinessCard(
+          name: name,
+          emails: emails,
+          phoneNumbers: phones,
+          imagePath: widget.imagePath,
+          address: address,
+          website: url);
 
       scannedText = extractedText;
     });
@@ -137,7 +147,6 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
 
     return cleanedText.trim();
   }
-
 
   Widget formatExtractedText(context) {
     return Column(
@@ -196,25 +205,30 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
             'Aucun, numéro ou email trouvé. \nEssayez de reprendre la photo.'),
         backgroundColor: Color(0xfff0ad4e),
       ));
+    }else{
+      // Utiliser Provider pour ajouter la carte
+      Provider.of<CardProvider>(context, listen: false).addCard(scannedCard);
+      /*final newContact = Contact(
+        givenName: name,
+        phones:
+        phones.map((phone) => Item(label: 'mobile', value: phone)).toList(),
+        emails: emails.map((email) => Item(label: 'work', value: email)).toList(),
+      );*/
+
+      //ContactsService.addContact(newContact);
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Contact enregistré avec succès !')));
     }
-    final newContact = Contact(
-      givenName: name,
-      phones: phones.map((phone) => Item(label: 'mobile', value: phone)).toList(),
-      emails: emails.map((email) => Item(label: 'work', value: email)).toList(),
-    );
 
-    ContactsService.addContact(newContact);
-    Navigator.pop(context);
-
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contact enregistré avec succès !')));
   }
 
-  void _goToEditPage(){
-    Navigator.push(
+  void _goToEditPage() {
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-        builder: (context) => EditContactPage(card: scannedCard, scannedText: scannedText),
-      ),
+      '/edit',
+      arguments: {'card': scannedCard, 'scannedText': scannedText},
     );
   }
 
@@ -246,8 +260,8 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                                 color: Colors.grey.withOpacity(0.3),
                                 spreadRadius: 2,
                                 blurRadius: 5,
-                                offset:
-                                    const Offset(0, 3), // changes position of shadow
+                                offset: const Offset(
+                                    0, 3), // changes position of shadow
                               ),
                             ]),
                       ),
@@ -325,7 +339,8 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                       backgroundColor: Colors.blue,
                       padding: const EdgeInsets.all(16.0),
                       foregroundColor: Colors.white,
-                      textStyle: const TextStyle(fontSize: 18.0, color: Colors.white),
+                      textStyle:
+                          const TextStyle(fontSize: 18.0, color: Colors.white),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0),
                       ),
@@ -343,7 +358,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                       ),
                     ),
                     onPressed: _saveContact,
-                    child: const Text('Save to Contacts'),
+                    child: const Text('Save Card'),
                   )
                 ],
               ),

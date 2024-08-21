@@ -1,13 +1,13 @@
 class BusinessCard {
-  final int? id;
-  final String name;
-  final String? position;
-  final String? companyName;
-  final List<String> emails;
-  final List<String> phoneNumbers;
-  final String? website;
-  final String? address;
-  final String imagePath;
+  int? id;
+  String name;
+  String? position;
+  String? companyName;
+  List<String> emails;
+  List<String> phoneNumbers;
+  String? website;
+  String? address;
+  String imagePath;
 
   BusinessCard({
     this.id,
