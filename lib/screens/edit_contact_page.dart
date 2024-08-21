@@ -1,6 +1,8 @@
+import 'package:business_card_scanner/db/card_provider.dart';
 import 'package:business_card_scanner/models/business_card.dart';
 import 'package:flutter/material.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:provider/provider.dart';
 
 class EditContactPage extends StatefulWidget {
   final String scannedText;
@@ -37,13 +39,14 @@ class _EditContactPageState extends State<EditContactPage> {
   }
 
   void _saveContact() {
-    final newContact = Contact(
-      givenName: _nameController.text,
-      phones: _phoneControllers.map((controller) => Item(label: 'mobile', value: controller.text)).toList(),
-      emails: _emailControllers.map((controller) => Item(label: 'work', value: controller.text)).toList(),
-    );
+    BusinessCard scannedCard = widget.card;
+    scannedCard.name = _nameController.text;
+    scannedCard.phoneNumbers = _phoneControllers.map((controller) => controller.text).toList();
+    scannedCard.emails = _emailControllers.map((controller) => controller.text).toList();
 
-    ContactsService.addContact(newContact);
+    // Utiliser Provider pour ajouter la carte
+    Provider.of<CardProvider>(context, listen: false).addCard(scannedCard);
+
     Navigator.pop(context);
 
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contact enregistré avec succès !')));

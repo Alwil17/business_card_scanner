@@ -14,45 +14,53 @@ class SavedCardsScreen extends StatelessWidget {
       ),
       body: Consumer<CardProvider>(
         builder: (context, cardProvider, child) {
-          return ListView.builder(
-            itemCount: cardProvider.cards.length,
-            itemBuilder: (context, index) {
-              final card = cardProvider.cards[index];
-              return Card(
-                child: ListTile(
-                  title: Text(card.name),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (card.position != null) Text(card.position!),
-                      if (card.companyName != null) Text(card.companyName!),
-                      if (card.website != null) Text('Site: ${card.website!}'),
-                      if (card.address != null) Text('Adresse: ${card.address!}'),
-                      Text('Email: ${card.emails.join(', ')}'),
-                      Text('Téléphone: ${card.phoneNumbers.join(', ')}'),
-                    ],
-                  ),
-                  leading: card.imagePath.isNotEmpty
-                      ? Image.file(File(card.imagePath))
-                      : null,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EditContactPage(card: card, scannedText: ""),
-                      ),
-                    );
-                  },
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () {
-                      cardProvider.deleteCard(card.id!);
+          final cards = cardProvider.cards;
+          if (cards.isEmpty) {
+            return Center(child: Text('Aucune carte de visite enregistrée'));
+          } else {
+            return ListView.builder(
+              itemCount: cardProvider.cards.length,
+              itemBuilder: (context, index) {
+                final card = cardProvider.cards[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(card.name),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (card.position != null) Text(card.position!),
+                        if (card.companyName != null) Text(card.companyName!),
+                        if (card.website != null)
+                          Text('Site: ${card.website!}'),
+                        if (card.address != null)
+                          Text('Adresse: ${card.address!}'),
+                        Text('Email: ${card.emails.join(', ')}'),
+                        Text('Téléphone: ${card.phoneNumbers.join(', ')}'),
+                      ],
+                    ),
+                    leading: card.imagePath.isNotEmpty
+                        ? Image.file(File(card.imagePath))
+                        : null,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              EditContactPage(card: card, scannedText: ""),
+                        ),
+                      );
                     },
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () {
+                        cardProvider.deleteCard(card.id!);
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
-          );
+                );
+              },
+            );
+          }
         },
       ),
     );
