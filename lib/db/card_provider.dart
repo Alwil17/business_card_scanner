@@ -16,6 +16,7 @@ class CardProvider with ChangeNotifier {
   Future<void> addCard(BusinessCard card) async {
     await DatabaseHelper().insertCard(card);
     _cards.add(card);
+    loadCards();
     notifyListeners();
   }
 
@@ -24,6 +25,7 @@ class CardProvider with ChangeNotifier {
     int index = _cards.indexWhere((c) => c.id == card.id);
     if (index != -1) {
       _cards[index] = card;
+      loadCards();
       notifyListeners();
     }
   }
@@ -31,6 +33,7 @@ class CardProvider with ChangeNotifier {
   Future<void> deleteCard(int id) async {
     await DatabaseHelper().deleteCard(id);
     _cards.removeWhere((c) => c.id == id);
+    loadCards();
     notifyListeners();
   }
 }
