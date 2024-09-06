@@ -358,7 +358,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                       ),
                     ),
                     onPressed: _saveContact,
-                    child: const Text('Save Card'),
+                    child: const Text('Save to Cards list'),
                   )
                 ],
               ),
