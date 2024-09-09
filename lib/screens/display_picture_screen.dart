@@ -157,7 +157,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
           phoneNumbers: phones,
           imagePath: (_croppedImage != null) ? _croppedImage!.path : "",
           address: address,
-          website: url);
+          website: url, tags: []);
 
       scannedText = extractedText;
     });

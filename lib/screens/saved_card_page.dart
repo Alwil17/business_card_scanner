@@ -21,6 +21,7 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.withAlpha(20),
       /*appBar: AppBar(
         title: Text('Cartes de Visite Sauvegardées'),
       ),*/

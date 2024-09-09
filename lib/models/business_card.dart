@@ -1,3 +1,5 @@
+import 'package:business_card_scanner/models/tag.dart';
+
 class BusinessCard {
   int? id;
   String name;
@@ -5,11 +7,11 @@ class BusinessCard {
   String? companyName;
   List<String> emails;
   List<String> phoneNumbers;
-  List<String>? tags;
   String? website;
   String? address;
   String imagePath;
   String? note;
+  List<Tag> tags;
 
   BusinessCard({
     this.id,
@@ -18,11 +20,11 @@ class BusinessCard {
     this.companyName,
     required this.emails,
     required this.phoneNumbers,
-    this.tags,
     this.website,
     this.address,
     required this.imagePath,
-    this.note
+    this.note,
+    required this.tags,
   });
 
   Map<String, dynamic> toMap() {
@@ -32,7 +34,6 @@ class BusinessCard {
       'position': position,
       'companyName': companyName,
       'emails': emails.join(','), // Store as comma-separated string
-      'tags': (tags != null && tags!.isNotEmpty) ? tags!.join(',') : null, // Store as comma-separated string
       'phoneNumbers': phoneNumbers.join(','), // Store as comma-separated string
       'website': website,
       'address': address,
@@ -41,19 +42,24 @@ class BusinessCard {
     };
   }
 
-  static BusinessCard fromMap(Map<String, dynamic> map) {
+  // Méthode pour créer un BusinessCard à partir d'une Map
+  static Future<BusinessCard> fromMap(Map<String, dynamic> map, List<Tag> allTags) async {
+    // Récupérer les tags depuis la liste globale à partir des IDs stockés
+    //List<String> tagIds = map['tags'] != null ? map['tags'].split(',') : [];
+
+
     return BusinessCard(
       id: map['id'],
       name: map['name'],
       position: map['position'],
       companyName: map['companyName'],
-      emails: map['emails'].split(','), // Convert comma-separated string to list
-      phoneNumbers: map['phoneNumbers'].split(','), // Convert comma-separated string to list
-      tags: (map['tags'] != null) ? map['tags'].split(',') : null, // Convert comma-separated string to list
+      emails: (map['emails'] as String).split(','),
+      phoneNumbers: (map['phoneNumbers'] as String).split(','),
       website: map['website'],
       address: map['address'],
       imagePath: map['imagePath'],
-      note: map['note']
+      note: map['note'],
+      tags: allTags,
     );
   }
 }

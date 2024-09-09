@@ -1,14 +1,20 @@
 import 'package:business_card_scanner/db/card_provider.dart';
+import 'package:business_card_scanner/db/tag_provider.dart';
 import 'package:business_card_scanner/layouts/saved_cards_screen.dart';
 import 'package:business_card_scanner/layouts/home_screen.dart';
+import 'package:business_card_scanner/screens/tag_manage_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  runApp(ChangeNotifierProvider(
-    create: (context) => CardProvider()..loadCards(),
-    child: MyApp(),
-  ));
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(
+      create: (context) => CardProvider()..loadCards()
+    ),
+    ChangeNotifierProvider(
+        create: (context) => TagProvider()..loadTags()
+    ),
+  ], child: MyApp(),));
 }
 
 class MyApp extends StatelessWidget {
@@ -49,13 +55,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
 
   // Les différentes pages de l'application
   final List<Widget> _pages = [
-    HomeScreen(), // Comprend CameraScreen, DisplayPictureScreen, EditContactPage
     SavecCardsScreen(), // Comprend les cartes sauvegardées
-    //MyOwnCardScreen(), // Les cartes que vous allez créer vous-même
+    HomeScreen(), // Comprend CameraScreen, DisplayPictureScreen, EditContactPage
+    TagManagePage(), // Les cartes que vous allez créer vous-même
   ];
 
   void _onItemTapped(int index) {
@@ -71,16 +77,16 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
+            icon: Icon(Icons.contacts),
+            label: 'Contacts',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.group),
-            label: 'Group',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Person',
+            icon: Icon(Icons.list),
+            label: 'Groups',
           ),
         ],
         currentIndex: _selectedIndex,
