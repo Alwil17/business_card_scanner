@@ -15,6 +15,7 @@ class CardProvider with ChangeNotifier {
 
   Future<void> addCard(BusinessCard card) async {
     await DatabaseHelper().insertCard(card);
+    //print(card.toMap());
     _cards.add(card);
     loadCards();
     notifyListeners();

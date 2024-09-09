@@ -1,6 +1,5 @@
 import 'package:business_card_scanner/models/business_card.dart';
 import 'package:business_card_scanner/screens/camera_screen.dart';
-import 'package:business_card_scanner/screens/card_screen_details.dart';
 import 'package:business_card_scanner/screens/display_picture_screen.dart';
 import 'package:business_card_scanner/screens/edit_contact_page.dart';
 import 'package:flutter/material.dart';
@@ -29,13 +28,6 @@ class HomeScreen extends StatelessWidget {
                   card: card,
                   scannedText: scannedText,
                 );
-            break;
-          case '/view':
-            final args = settings.arguments as Map<String, dynamic>;
-            final BusinessCard card = args['card'];
-            builder = (BuildContext context) => CardDetailScreen(
-              card: card,
-            );
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');

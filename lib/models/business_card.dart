@@ -10,7 +10,6 @@ class BusinessCard {
   String? address;
   String imagePath;
   String? note;
-  String? tag;
 
   BusinessCard({
     this.id,
@@ -23,8 +22,7 @@ class BusinessCard {
     this.website,
     this.address,
     required this.imagePath,
-    this.note,
-    this.tag,
+    this.note
   });
 
   Map<String, dynamic> toMap() {
@@ -39,8 +37,7 @@ class BusinessCard {
       'website': website,
       'address': address,
       'imagePath': imagePath,
-      'note': note,
-      'tag': tag,
+      'note': note
     };
   }
 
@@ -56,8 +53,7 @@ class BusinessCard {
       website: map['website'],
       address: map['address'],
       imagePath: map['imagePath'],
-      note: map['note'],
-      tag: map['tag'],
+      note: map['note']
     );
   }
 }

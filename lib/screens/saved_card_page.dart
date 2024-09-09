@@ -72,70 +72,25 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
             ),
             const SizedBox(height: 5),
             // List of filtered cards
-            /*Consumer<CardProvider>(
-              builder: (context, cardProvider, child) {
-                final cards = cardProvider.cards;
-                if (cards.isEmpty) {
-                  return Center(child: Text('Aucune carte de visite enregistrée'));
-                } else {
-                  return ListView.builder(
-                    itemCount: cardProvider.cards.length,
-                    itemBuilder: (context, index) {
-                      final card = cardProvider.cards[index];
-                      return Card(
-                        child: ListTile(
-                          title: Text(card.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (card.position != null) Text(card.position!),
-                              if (card.companyName != null) Text(card.companyName!),
-                              Text('${card.emails.join('/')}'),
-                              Text('${card.phoneNumbers.join('/')}'),
-                            ],
-                          ),
-                          leading: card.imagePath.isNotEmpty
-                              ? Image.file(File(card.imagePath))
-                              : null,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    EditContactPage(card: card, scannedText: ""),
-                              ),
-                            );
-                          },
-                          trailing: IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () {
-                              cardProvider.deleteCard(card.id!);
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }
-              },
-            )*/
             Expanded(
               child: Consumer<CardProvider>(
                 builder: (context, cardProvider, child) {
                   final cards = cardProvider.cards;
                   final filteredCards = cards.where((card) {
                     final searchLower = searchQuery.toLowerCase();
-                    // Check for search query and selected tags
-                    return (card.name.toLowerCase().contains(searchLower) ||
-                        (card.companyName != null &&
-                            card.companyName!
-                                .toLowerCase()
-                                .contains(searchLower)) ||
-                        card.phoneNumbers.any((phone) =>
-                            phone.toLowerCase().contains(searchLower)) ||
-                        card.emails.any((email) =>
-                            email.toLowerCase().contains(searchLower))) &&
-                        (selectedTags.isEmpty || selectedTags.contains(card.tag));
+                    // Check if any tag in card.tags matches any selectedTags, handling nullable tags
+                    final tagMatches = selectedTags.isEmpty ||
+                        (card.tags != null && card.tags!.any((tag) => selectedTags.contains(tag)));
+
+                    // Check for search query in name, companyName, phoneNumbers, or emails
+                    final searchMatches = card.name.toLowerCase().contains(searchLower) ||
+                        (card.companyName != null && card.companyName!.toLowerCase().contains(searchLower)) ||
+                        card.phoneNumbers.any((phone) => phone.toLowerCase().contains(searchLower)) ||
+                        card.emails.any((email) => email.toLowerCase().contains(searchLower));
+
+
+                    // Return true only if both the search query matches and the tags match
+                    return searchMatches && tagMatches;
                   }).toList();
 
                   if (filteredCards.isEmpty) {
@@ -181,13 +136,5 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
         // Utilisez ces valeurs pour filtrer et trier vos cartes
       });
     }
-
-    /*showModalBottomSheet<List<String>>(
-      context: context,
-      builder: (context) {
-        List<String> tempSelectedTags = List.from(selectedTags);
-        return _buildFilterModal(context, tempSelectedTags);
-      },
-    );*/
   }
 }
