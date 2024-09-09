@@ -10,7 +10,7 @@ class BusinessCardItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(onTap: () => Navigator.of(context).pushNamed(),child: Card(
+    return InkWell(onTap: () => Navigator.pushNamed(context, '/view', arguments: {'card': card}),child: Card(
       margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),

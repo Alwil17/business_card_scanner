@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'edit_contact_page.dart';
 
-class SavedCardsScreen extends StatefulWidget {
+class SavedCardsPage extends StatefulWidget {
   @override
-  _SavedCardsScreenState createState() => _SavedCardsScreenState();
+  _SavedCardsPageState createState() => _SavedCardsPageState();
 }
 
-class _SavedCardsScreenState extends State<SavedCardsScreen> {
+class _SavedCardsPageState extends State<SavedCardsPage> {
   String searchQuery = '';
 
   // Dummy list of tags for the filter modal.

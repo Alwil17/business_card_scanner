@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:business_card_scanner/models/business_card.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,6 +22,7 @@ class CardDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.withAlpha(20),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -51,111 +55,184 @@ class CardDetailScreen extends StatelessWidget {
           )
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Carte de visite affichée
+            _buildImageContainer(),
+            const SizedBox(height: 10),
+            _buildCardActions(),
+            const SizedBox(height: 10),
             Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.0),
               ),
-              child: Column(
-                children: [
-                  Image.network(
-                      'https://www.reallygreatsite.com/qr.png'), // Remplacer par une image de carte
-                  ListTile(
-                    title: Text(card.name,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    subtitle: Text(card.position!),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.phone),
-                    title: Text(card.phoneNumbers.first),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.email),
-                    title: Text(card.emails.first),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.web),
-                    title: Text(card.website!),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.location_on),
-                    title: Text(card.address!),
-                  ),
-                ],
+              surfaceTintColor: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Section Tags
+                    _buildInfoTitle("Tags"),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8.0,
+                      children: ["Friend", "Investor"].map((tag) {
+                        return Chip(
+                          label: Text(
+                            tag.toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          shape: StadiumBorder(side: BorderSide(color: Colors.blue.withAlpha(50), width: 0)),
+                          backgroundColor: Colors.blue.withAlpha(50), // Couleur du tag
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    // Section Note
+                    _buildInfoRow("Note", card.note ?? ""),
+                  ],
+                ),
               ),
-            ),
-
-            // Actions avec les icônes pour passer un appel, envoyer un SMS, email, etc.
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.phone, color: Colors.blue),
-                  onPressed: () {
-                    _launchUrl('tel:${card.phoneNumbers.first}');
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.message, color: Colors.blue),
-                  onPressed: () {
-                    _launchUrl('sms:${card.phoneNumbers.first}');
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.email, color: Colors.blue),
-                  onPressed: () {
-                    _launchUrl('mailto:${card.emails.first}');
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.web, color: Colors.blue),
-                  onPressed: () {
-                    _launchUrl(card.website!);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.location_on, color: Colors.blue),
-                  onPressed: () {
-                    _launchUrl(
-                        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(card.address!)}');
-                  },
-                ),
-              ],
             ),
             const SizedBox(height: 16),
-
-            // Tags (comme "Friend", "Investor")
-            Wrap(
-              spacing: 8.0,
-              children: card.tags!.map((tag) {
-                return Chip(
-                  label: Text(tag),
-                );
-              }).toList(),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              surfaceTintColor: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _buildCardInfos(),
+              ),
             ),
-
-            // Autres détails (Note, Full Name, Company)
-            ListTile(
-              title: const Text('Note'),
-              subtitle: Text(card.note!),
-            ),
-            ListTile(
-              title: const Text('Full Name'),
-              subtitle: Text(card.name),
-            ),
-            ListTile(
-              title: const Text('Company'),
-              subtitle: Text(card.companyName!),
-            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildInfoTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    );
+  }
+
+  Widget _buildImageContainer() {
+    return Container(
+      height: 250,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.red,
+          image: DecorationImage(
+            image: Image.file(File(card.imagePath)).image,
+            // replace with your image asset
+            fit: BoxFit.cover,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3), // changes position of shadow
+            ),
+          ]),
+    ); // Remplacer par une image de carte
+  }
+
+  Widget _buildCardActions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        IconButton.filled(
+          icon: const Icon(Icons.phone),
+          onPressed: () {
+            _launchUrl('tel:${card.phoneNumbers.first}');
+          },
+          style: IconButton.styleFrom(backgroundColor: Colors.blue),
+        ),
+        IconButton.filled(
+          icon: const Icon(Icons.message),
+          onPressed: () {
+            _launchUrl('sms:${card.phoneNumbers.first}');
+          },
+          style: IconButton.styleFrom(backgroundColor: Colors.blue),
+        ),
+        IconButton.filled(
+          icon: const Icon(Icons.email),
+          onPressed: () {
+            _launchUrl('mailto:${card.emails.first}');
+          },
+          style: IconButton.styleFrom(backgroundColor: Colors.blue),
+        ),
+        Visibility(visible: (card.website != null && card.website!.isNotEmpty),child: IconButton.filled(
+          icon: const Icon(Icons.web),
+          onPressed: () {
+            _launchUrl(card.website!);
+          },
+          style: IconButton.styleFrom(backgroundColor: Colors.blue),
+        )),
+
+        Visibility(visible: (card.address != null && card.address!.isNotEmpty),child: IconButton.filled(
+          icon: const Icon(Icons.location_on),
+          onPressed: () {
+            _launchUrl(
+                'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(card.address ?? "")}');
+          },
+          style: IconButton.styleFrom(backgroundColor: Colors.blue),
+        ))
+
+      ],
+    );
+  }
+
+  // Fonction pour créer une ligne d'information avec une ligne séparatrice
+  Widget _buildInfoRow(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildInfoTitle(label),
+        const SizedBox(height: 10),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 14),
+        ),
+        const Divider(thickness: 1), // Ligne séparatrice
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+
+  Widget _buildCardInfos() {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Full Name
+        _buildInfoRow("Full name", card.name),
+
+        // Section Company
+        Visibility(visible: (card.companyName != null && card.companyName!.isNotEmpty),child: _buildInfoRow("Company", card.companyName ?? "")),
+
+        // Section Position
+        Visibility(visible: (card.position != null && card.position!.isNotEmpty),child: _buildInfoRow("Position", card.position ?? "")),
+        // Section contacts
+        _buildInfoRow("Contact(s)", card.phoneNumbers.join(" / ")),
+
+        // Section emails
+        _buildInfoRow("Email(s)", card.emails.join(" / ")),
+
+        // Section Adresse
+        Visibility(visible: (card.address != null && card.address!.isNotEmpty),child: _buildInfoRow("Adresse", card.address ?? "")),
+
+        // Section Website
+        Visibility(visible: (card.website != null && card.website!.isNotEmpty),child: _buildInfoRow("Website", card.website ?? "")),
+      ],);
   }
 
   // Fonction de suppression de la carte
