@@ -31,10 +31,12 @@ class DatabaseHelper {
             position TEXT,
             companyName TEXT,
             emails TEXT NOT NULL,
+            tags TEXT NOT NULL,
             phoneNumbers TEXT NOT NULL,
             website TEXT,
             address TEXT,
-            imagePath TEXT NOT NULL
+            imagePath TEXT NOT NULL,
+            note TEXT
           )
           ''',
         );
@@ -56,6 +58,7 @@ class DatabaseHelper {
 
   Future<void> insertCard(BusinessCard card) async {
     final Database db = await database;
+    print(card.toMap());
     await db.insert(
       'cards',
       card.toMap(),

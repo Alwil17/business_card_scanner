@@ -1,7 +1,6 @@
 import 'package:business_card_scanner/db/card_provider.dart';
-import 'package:business_card_scanner/screens/camera_screen.dart';
-import 'package:business_card_scanner/screens/home_screen.dart';
-import 'package:business_card_scanner/screens/saved_card_screen.dart';
+import 'package:business_card_scanner/layouts/saved_cards_screen.dart';
+import 'package:business_card_scanner/layouts/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -55,7 +54,7 @@ class _MainScreenState extends State<MainScreen> {
   // Les différentes pages de l'application
   final List<Widget> _pages = [
     HomeScreen(), // Comprend CameraScreen, DisplayPictureScreen, EditContactPage
-    SavedCardsScreen(), // Comprend les cartes sauvegardées
+    SavecCardsScreen(), // Comprend les cartes sauvegardées
     //MyOwnCardScreen(), // Les cartes que vous allez créer vous-même
   ];
 

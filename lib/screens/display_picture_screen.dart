@@ -1,13 +1,10 @@
 import 'dart:io';
 import 'package:business_card_scanner/db/card_provider.dart';
 import 'package:business_card_scanner/models/business_card.dart';
-import 'package:contacts_service/contacts_service.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:provider/provider.dart';
-
-import 'edit_contact_page.dart';
 
 class DisplayPictureScreen extends StatefulWidget {
   final String imagePath;
@@ -19,6 +16,7 @@ class DisplayPictureScreen extends StatefulWidget {
 }
 
 class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
+  File? _croppedImage;
   late BusinessCard scannedCard;
   String scannedText = "Scanning...";
   String name = "";
@@ -43,11 +41,40 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   @override
   void initState() {
     super.initState();
-    _scanCard();
+    _cropImage();
+  }
+
+  Future<void> _cropImage() async {
+    CroppedFile? cropped = await ImageCropper()
+        .cropImage(sourcePath: widget.imagePath, uiSettings: [
+      AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: Colors.blue,
+          toolbarWidgetColor: Colors.white,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.original,
+          ]),
+      IOSUiSettings(title: 'Crop Image', aspectRatioPresets: [
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.original,
+      ])
+    ]);
+
+    if (cropped != null) {
+      setState(() {
+        _croppedImage = File(cropped.path);
+      });
+
+      // Une fois recadré, appeler OCR pour lire les informations
+      await _scanCard();
+    }
   }
 
   Future<void> _scanCard() async {
-    final inputImage = InputImage.fromFilePath(widget.imagePath);
+    final inputImage = InputImage.fromFilePath((_croppedImage != null) ? _croppedImage!.path : "");
     final textDetector = TextRecognizer();
     final RecognizedText recognisedText =
         await textDetector.processImage(inputImage);
@@ -128,7 +155,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
           name: name,
           emails: emails,
           phoneNumbers: phones,
-          imagePath: widget.imagePath,
+          imagePath: (_croppedImage != null) ? _croppedImage!.path : "",
           address: address,
           website: url);
 
@@ -246,14 +273,14 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: 250,
+                        height: 200,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
                             color: Colors.red,
                             image: DecorationImage(
-                              image: Image.file(File(widget.imagePath)).image,
+                              image: Image.file(File((_croppedImage != null) ? _croppedImage!.path : "")).image,
                               // replace with your image asset
-                              fit: BoxFit.cover,
+                              fit: BoxFit.fill,
                             ),
                             boxShadow: [
                               BoxShadow(
@@ -358,7 +385,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                       ),
                     ),
                     onPressed: _saveContact,
-                    child: const Text('Save Card'),
+                    child: const Text('Save to Cards list'),
                   )
                 ],
               ),

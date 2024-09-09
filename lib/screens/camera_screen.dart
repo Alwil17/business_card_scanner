@@ -57,12 +57,7 @@ class _CameraScreenState extends State<CameraScreen> {
           try {
             await _initializeControllerFuture;
             final image = await _controller.takePicture();
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(imagePath: image.path),
-              ),
-            );
+            Navigator.pushNamed(context, "/display", arguments: image.path);
           } catch (e) {
             print(e);
           }
