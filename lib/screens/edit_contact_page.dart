@@ -1,5 +1,7 @@
 import 'package:business_card_scanner/db/card_provider.dart';
+import 'package:business_card_scanner/db/tag_provider.dart';
 import 'package:business_card_scanner/models/business_card.dart';
+import 'package:business_card_scanner/models/tag.dart';
 import 'package:flutter/material.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +23,8 @@ class _EditContactPageState extends State<EditContactPage> {
   late TextEditingController _nameController;
   late List<TextEditingController> _phoneControllers;
   late List<TextEditingController> _emailControllers;
+  List<Tag> _availableTags = []; // Liste des tags disponibles
+  List<Tag> _selectedTags = []; // Liste des tags sélectionnés
 
   @override
   void initState() {
@@ -28,8 +32,20 @@ class _EditContactPageState extends State<EditContactPage> {
     _nameController = TextEditingController(text: widget.card.name);
     _phoneControllers = widget.card.phoneNumbers.map((phone) => TextEditingController(text: phone)).toList();
     _emailControllers = widget.card.emails.map((email) => TextEditingController(text: email)).toList();
+
+    // Charger les tags existants via un Provider ou une base de données
+    _loadTags();
   }
 
+  Future<void> _loadTags() async {
+    // Charger les tags depuis la base de données ou via le provider
+    List<Tag> tags = Provider.of<TagProvider>(context, listen: false).tags;
+
+    setState(() {
+      _availableTags = tags;
+      _selectedTags = widget.card.tags; // Prendre les tags associés à la carte
+    });
+  }
   @override
   void dispose() {
     _nameController.dispose();
@@ -43,6 +59,7 @@ class _EditContactPageState extends State<EditContactPage> {
     scannedCard.name = _nameController.text;
     scannedCard.phoneNumbers = _phoneControllers.map((controller) => controller.text).toList();
     scannedCard.emails = _emailControllers.map((controller) => controller.text).toList();
+    scannedCard.tags = _selectedTags; // Enregistrer les tags sélectionnés
 
     // Utiliser Provider pour ajouter la carte
     Provider.of<CardProvider>(context, listen: false).addCard(scannedCard);
@@ -50,6 +67,31 @@ class _EditContactPageState extends State<EditContactPage> {
     Navigator.pop(context);
 
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contact enregistré avec succès !')));
+  }
+
+  // Construction de la liste des tags sous forme de CheckboxListTile
+  Widget _buildTagSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Tags', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 16)),
+        ..._availableTags.map((tag) {
+          return CheckboxListTile(
+            title: Text(tag.name),
+            value: _selectedTags.contains(tag),
+            onChanged: (bool? isSelected) {
+              setState(() {
+                if (isSelected == true) {
+                  _selectedTags.add(tag);
+                } else {
+                  _selectedTags.remove(tag);
+                }
+              });
+            },
+          );
+        }).toList(),
+      ],
+    );
   }
 
   Widget _buildPhoneFields() {
@@ -102,6 +144,8 @@ class _EditContactPageState extends State<EditContactPage> {
             const SizedBox(height: 16),
             const Text('Emails', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 16)),
             _buildEmailFields(),
+            const SizedBox(height: 16),
+            _buildTagSelection(),
           ],
         ),
       ),

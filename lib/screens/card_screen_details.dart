@@ -78,10 +78,10 @@ class CardDetailScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8.0,
-                      children: ["Friend", "Investor"].map((tag) {
+                      children: card.tags.map((tag) {
                         return Chip(
                           label: Text(
-                            tag.toUpperCase(),
+                            tag.name.toUpperCase(),
                             style: const TextStyle(
                               color: Colors.blue,
                               fontWeight: FontWeight.bold,
@@ -120,20 +120,20 @@ class CardDetailScreen extends StatelessWidget {
   Widget _buildInfoTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
     );
   }
 
   Widget _buildImageContainer() {
     return Container(
-      height: 250,
+      height: 200,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           color: Colors.red,
           image: DecorationImage(
             image: Image.file(File(card.imagePath)).image,
             // replace with your image asset
-            fit: BoxFit.cover,
+            fit: BoxFit.fill,
           ),
           boxShadow: [
             BoxShadow(
@@ -202,7 +202,7 @@ class CardDetailScreen extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           value,
-          style: const TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 16),
         ),
         const Divider(thickness: 1), // Ligne séparatrice
         const SizedBox(height: 10),
